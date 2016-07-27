@@ -27,18 +27,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void CreateArt(View view){
         int i,j;
-        int height= random.nextInt(700);
-        int width = random.nextInt(700);
+        int height= random.nextInt(400);
+        int width = random.nextInt(400);
         int total = height*width;
         sizeDisp.setText(Integer.toString(height)+"x"+Integer.toString(width));
-        progressBar.setMax(width);
+        progressBar.setMax(total);
         CreateImageTask EutaTask = new CreateImageTask();
-        EutaTask.execute(width,height,width);
+        EutaTask.execute(width,height,total);
 
     }
 
 
-
+    /**
+     * ASYNCTASK CLASS
+     */
     private class CreateImageTask extends AsyncTask<Integer,Integer,Bitmap> {
         private Bitmap Art2D2;
 
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 for (j=0;j<Art.getHeight();j++){
 
                     Art.setPixel(i,j, Color.argb(255,getRand(),getRand(),getRand()));
-                    prog= i;
+                    prog= i*height+j;
 
                     publishProgress(prog);
                 }
@@ -89,7 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    /**
+     * generate random numbers
+     *
+     * @return random number %255
+     */
     private int getRand(){
         int rand=random.nextInt(255);
         if(rand<100){
