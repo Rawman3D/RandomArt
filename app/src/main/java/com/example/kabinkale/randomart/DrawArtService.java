@@ -44,7 +44,7 @@ public class DrawArtService extends IntentService {
 
         broadcastMax.setAction(ACTION_TOTAL);
         broadcastMax.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastMax.putExtra(TOTAL_PROGRESS,width);
+        broadcastMax.putExtra(TOTAL_PROGRESS,height);
         sendBroadcast(broadcastMax);
 
 
@@ -61,7 +61,7 @@ public class DrawArtService extends IntentService {
                 Art.setPixel(i,j, Color.argb(255,getRand(),getRand(),getRand()));
 
             }
-            broadcastUpdate.putExtra(UPDATE_PROGRESS,width);
+            broadcastUpdate.putExtra(UPDATE_PROGRESS,i+1);
             sendBroadcast(broadcastUpdate);
 
         }

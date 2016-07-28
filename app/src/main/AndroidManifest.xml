@@ -17,6 +17,22 @@
         </activity>
         <service android:name="com.example.kabinkale.randomart.DrawArtService"
             android:exported="false"/>
+
+        <receiver android:name=".MainActivity$ProgressBarReceiver">
+            <intent-filter>
+                <action android:name="com.example.kabinkale.randomart.DrawArtServices.ACTION_TOTAL">
+
+                </action>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".MainActivity$ProgressUpdateReceiver">
+            <intent-filter>
+                <action android:name="com.example.kabinkale.randomart.DrawArtServices.ACTION_PROGRESS">
+
+                </action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+
     private static ImageView imageView;
     private Random random = new Random();
     private ProgressBar progressBar;
@@ -30,20 +32,31 @@ public class MainActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         sizeDisp = (TextView) findViewById(R.id.sizeDisp);
 
+
+        IntentFilter filter1= new IntentFilter(DrawArtService.ACTION_TOTAL);
+        filter1.addCategory(Intent.CATEGORY_DEFAULT);
+        progressMax = new ProgressBarReceiver();
+        registerReceiver(progressMax,filter1);
+
+        IntentFilter filter2= new IntentFilter(DrawArtService.ACTION_PROGRESS);
+        filter2.addCategory(Intent.CATEGORY_DEFAULT);
+        progressUpdate = new ProgressUpdateReceiver();
+        registerReceiver(progressUpdate,filter2);
+
         IntentFilter filter = new IntentFilter(DrawArtService.ACTION_RESP);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new ResponseReceiver();
         registerReceiver(receiver,filter);
 
-        IntentFilter filter1= new IntentFilter(DrawArtService.ACTION_TOTAL);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        progressMax = new ProgressBarReceiver();
-        registerReceiver(progressMax,filter1);
+    }
 
-        IntentFilter filter2= new IntentFilter(DrawArtService.ACTION_PROGRESS);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        progressUpdate = new ProgressUpdateReceiver();
-        registerReceiver(progressUpdate,filter2);
+    @Override
+    protected void onStop()
+    {
+        unregisterReceiver(progressMax);
+        unregisterReceiver(progressUpdate);
+        unregisterReceiver(receiver);
+        super.onStop();
     }
 
     public void CreateArt(View view){
@@ -74,8 +87,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int progress = intent.getIntExtra(DrawArtService.TOTAL_PROGRESS,0);
-            progressBar.setMax(progress);
+            int progressMax = intent.getIntExtra(DrawArtService.TOTAL_PROGRESS,22);
+            progressBar.setMax(progressMax);
+            sizeDisp.setText(Integer.toString(progressMax));
+
         }
     }
 
@@ -83,8 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int progress = intent.getIntExtra(DrawArtService.UPDATE_PROGRESS,0);
+            int progress = intent.getIntExtra(DrawArtService.UPDATE_PROGRESS,22);
             progressBar.setProgress(progress);
+            Log.i(MainActivity.class.getSimpleName(),Integer.toString(progress));
+//            sizeDisp.setText(Integer.toString(progress));
         }
     }
     /**
