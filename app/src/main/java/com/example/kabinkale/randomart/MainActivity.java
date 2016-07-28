@@ -1,8 +1,10 @@
 package com.example.kabinkale.randomart;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,10 +14,13 @@ import android.widget.TextView;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    private ImageView imageView;
+    private static ImageView imageView;
     private Random random = new Random();
     private ProgressBar progressBar;
     private TextView sizeDisp;
+    private ResponseReceiver receiver;
+    private long total;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,74 +28,35 @@ public class MainActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.artDisplay);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         sizeDisp = (TextView) findViewById(R.id.sizeDisp);
+
+        IntentFilter filter = new IntentFilter(DrawArtService.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new ResponseReceiver();
+        registerReceiver(receiver,filter);
     }
 
     public void CreateArt(View view){
         int i,j;
         int height= random.nextInt(400);
         int width = random.nextInt(400);
-        int total = height*width;
-        sizeDisp.setText(Integer.toString(height)+"x"+Integer.toString(width));
-        progressBar.setMax(total);
-        CreateImageTask EutaTask = new CreateImageTask();
-        EutaTask.execute(width,height,total);
+
+
+        Intent whDrawIntent = new Intent(this,DrawArtService.class);
+        whDrawIntent.putExtra(DrawArtService.IN_HEIGHT,height);
+        whDrawIntent.putExtra(DrawArtService.IN_WIDTH,width);
+
+        startService(whDrawIntent);
 
     }
 
-
-    /**
-     * ASYNCTASK CLASS
-     */
-    private class CreateImageTask extends AsyncTask<Integer,Integer,Bitmap> {
-        private Bitmap Art2D2;
-
-        public Bitmap getArt2D2() {
-            return Art2D2;
-        }
-
-        public void setArt2D2(Bitmap art2D2) {
-            Art2D2 = art2D2;
-        }
-
+    public class ResponseReceiver extends BroadcastReceiver{
 
         @Override
-        protected Bitmap doInBackground(Integer... integers) {
-            int width=integers[0];
-            int i,j,prog;
-            int height = integers[1];
-            Bitmap Art = Bitmap.createBitmap(height,width, Bitmap.Config.ARGB_8888);
-
-            for(i=0;i<Art.getWidth();i++){
-                for (j=0;j<Art.getHeight();j++){
-
-                    Art.setPixel(i,j, Color.argb(255,getRand(),getRand(),getRand()));
-                    prog= i*height+j;
-
-                    publishProgress(prog);
-                }
-            }
-            setArt2D2(Art);
-            return Art;
+        public void onReceive(Context context, Intent intent) {
+            Bitmap finalArt = intent.getParcelableExtra(DrawArtService.OUT_BITMAP);
+            imageView.setImageBitmap(finalArt);
         }
-
-
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            imageView.setImageBitmap(bitmap);
-       }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-//            super.onProgressUpdate(values);
-            progressBar.setProgress(values[0]);
-
-        }
-
-
     }
-
     /**
      * generate random numbers
      *
