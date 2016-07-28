@@ -19,7 +19,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView sizeDisp;
     private ResponseReceiver receiver;
-    private long total;
+    private ProgressBarReceiver progressMax;
+    private ProgressUpdateReceiver progressUpdate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,16 @@ public class MainActivity extends AppCompatActivity {
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new ResponseReceiver();
         registerReceiver(receiver,filter);
+
+        IntentFilter filter1= new IntentFilter(DrawArtService.ACTION_TOTAL);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        progressMax = new ProgressBarReceiver();
+        registerReceiver(progressMax,filter1);
+
+        IntentFilter filter2= new IntentFilter(DrawArtService.ACTION_PROGRESS);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        progressUpdate = new ProgressUpdateReceiver();
+        registerReceiver(progressUpdate,filter2);
     }
 
     public void CreateArt(View view){
@@ -53,8 +64,27 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
             Bitmap finalArt = intent.getParcelableExtra(DrawArtService.OUT_BITMAP);
             imageView.setImageBitmap(finalArt);
+        }
+    }
+
+    public class ProgressBarReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int progress = intent.getIntExtra(DrawArtService.TOTAL_PROGRESS,0);
+            progressBar.setMax(progress);
+        }
+    }
+
+    public class ProgressUpdateReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int progress = intent.getIntExtra(DrawArtService.UPDATE_PROGRESS,0);
+            progressBar.setProgress(progress);
         }
     }
     /**

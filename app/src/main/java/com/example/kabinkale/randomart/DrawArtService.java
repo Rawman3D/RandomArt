@@ -15,7 +15,13 @@ public class DrawArtService extends IntentService {
     public static final String IN_HEIGHT="inHeight";
     public static final String IN_WIDTH="inWidth";
     public static final String OUT_BITMAP = "outBitmap";
-    public static final String ACTION_RESP = MainActivity.class.getSimpleName() + "MESSAGE_PROCESSED";
+    public static final String TOTAL_PROGRESS = "totalProgress";
+    public static final String UPDATE_PROGRESS = "updateProgress";
+
+    public static final String ACTION_RESP = MainActivity.class.getSimpleName() + "ART_PROCESSED";
+    public static final String ACTION_TOTAL = MainActivity.class.getSimpleName() + "MAX_PROGRESS_PROCESSED";
+    public static final String ACTION_PROGRESS = MainActivity.class.getSimpleName() + "PROGRESS_UPDATE";
+
 
 
     public DrawArtService() {
@@ -31,7 +37,23 @@ public class DrawArtService extends IntentService {
         int height = intent.getIntExtra(IN_HEIGHT,0);
         int width = intent.getIntExtra(IN_WIDTH,0);
         int i,j;
+
+        Intent broadcastArt = new Intent();
+        Intent broadcastMax = new Intent();
+        Intent broadcastUpdate = new Intent();
+
+        broadcastMax.setAction(ACTION_TOTAL);
+        broadcastMax.addCategory(Intent.CATEGORY_DEFAULT);
+        broadcastMax.putExtra(TOTAL_PROGRESS,width);
+        sendBroadcast(broadcastMax);
+
+
         Bitmap Art = Bitmap.createBitmap(height,width, Bitmap.Config.ARGB_8888);
+
+
+
+        broadcastUpdate.setAction(ACTION_PROGRESS);
+        broadcastUpdate.addCategory(Intent.CATEGORY_DEFAULT);
 
         for(i=0;i<Art.getWidth();i++){
             for (j=0;j<Art.getHeight();j++){
@@ -39,13 +61,14 @@ public class DrawArtService extends IntentService {
                 Art.setPixel(i,j, Color.argb(255,getRand(),getRand(),getRand()));
 
             }
+            broadcastUpdate.putExtra(UPDATE_PROGRESS,width);
+            sendBroadcast(broadcastUpdate);
+
         }
 
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(ACTION_RESP);
-        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastIntent.putExtra(OUT_BITMAP,Art);
-        sendBroadcast(broadcastIntent);
+        broadcastArt.setAction(ACTION_RESP);
+        broadcastArt.putExtra(OUT_BITMAP,Art);
+        sendBroadcast(broadcastArt);
     }
 
     /**
